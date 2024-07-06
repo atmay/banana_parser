@@ -132,9 +132,9 @@ def main():
     print()
     print("GRAMMAR:")
 
-    g_pair = Important(Wrapper(Group(Text(), Skipable(Terminal(","))), lambda p: p[0]))
+    g_pair = Wrapper(Group(Text(), Skipable(Terminal(","))), lambda p: p[0])
     g_pairs = Repeater(g_pair)
-    g_array = Wrapper(Group(Terminal("["), g_pairs, Terminal("]")), lambda g: g[1])
+    g_array = Wrapper(Group(Terminal("["), g_pairs, Important(Terminal("]"))), lambda g: g[1])
     grammar = Important(g_array)
 
     # G -> "[" pairs "]"
@@ -156,6 +156,9 @@ def main():
 
     print()
     print(grammar.parse('[a,b,!,d,]', 0))
+
+    print()
+    print(grammar.parse('[a,b,d,fg  444', 0))
 
     print()
     print(grammar.parse('{a,b,c,d}', 0))
