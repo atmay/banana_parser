@@ -70,7 +70,39 @@ class Repeater(Node):
         return (index, res_list)
 
 
-if __name__=='__main__':
+class Skipable(Node):
+    def __init__(self, node: Node):
+        self.node = node
+
+    def parse(self, text: str, cur: int = 0) -> tuple[int, str | list | None]:
+        cur, res = self.node.parse(text, cur)
+        return cur, ''
+
+
+class Wrapper(Node):
+    def __init__(self, node: Node, handler):
+        self.node = node
+        self.handler = handler
+
+    def parse(self, text: str, cur: int = 0) -> tuple[int, str | list | None]:
+        cur, res = self.node.parse(text, cur)
+        if res is None:
+            return cur, res
+        return cur, self.handler(res)
+
+
+class Important(Node):
+    def __init__(self, node: Node):
+        self.node = node
+
+    def parse(self, text: str, cur: int = 0) -> tuple[int, str | list | None]:
+        cur, res = self.node.parse(text, cur)
+        if res is None:
+            print(f"Error at: {cur}, {text[cur:cur+10]}")
+        return cur, res
+
+
+def main():
     text = Text()
     print(text.parse('abc123'))
     print(text.parse('23ASD'))
@@ -96,3 +128,38 @@ if __name__=='__main__':
     print()
     repeater = Repeater(Group(Text(), Terminal(",")))
     print(repeater.parse('a,b,c,d', 0))
+
+    print()
+    print("GRAMMAR:")
+
+    g_pair = Important(Wrapper(Group(Text(), Skipable(Terminal(","))), lambda p: p[0]))
+    g_pairs = Repeater(g_pair)
+    g_array = Wrapper(Group(Terminal("["), g_pairs, Terminal("]")), lambda g: g[1])
+    grammar = Important(g_array)
+
+    # G -> "[" pairs "]"
+    # pairs -> [ pair ]
+    # pair -> text ","
+
+    # g_pairs = [ text + optional(",") ]
+    # g_array = "[" + g_pairs + "]"
+    # grammar = g_array | g_object | g_element
+
+    print()
+    print(grammar.parse('a,b,c,', 0))
+
+    print()
+    print(grammar.parse('[a,b,c,d]', 0))
+
+    print()
+    print(grammar.parse('[a,b,c,d,]', 0))
+
+    print()
+    print(grammar.parse('[a,b,!,d,]', 0))
+
+    print()
+    print(grammar.parse('{a,b,c,d}', 0))
+
+
+if __name__=='__main__':
+    main()
