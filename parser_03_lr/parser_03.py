@@ -17,9 +17,10 @@ def parse(grammar, tokens):
                 size = len(body)
                 if size == len(buffer):
                     if match(buffer[-size:], body):
+                        node = (head, size)
                         buffer = buffer[0:len(buffer) - size]
-                        buffer.append((head,))
-                        output.append((head,))
+                        buffer.append(node)
+                        output.append(node)
                         active = True
                         break
             if active:
