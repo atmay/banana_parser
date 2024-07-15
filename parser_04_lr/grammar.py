@@ -3,8 +3,6 @@ class Grammar:
         self.rules = rules
         self.patterns = dict()
         for rule, values in rules.items():
-            print(rule)
-            print(values)
             for value in values:
                 self.patterns[value] = rule
 
