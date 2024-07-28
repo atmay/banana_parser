@@ -52,13 +52,13 @@ def main():
        ; ModuleID = "examples/ir_entry.py"
        target triple = "x86_64-pc-windows-msvc"
        
-       define i32 @"main"()
+       define i32 @main()
        {
        entry:
          ret i32 0
        }
        
-       define i32 @"mainCRTStartup"()
+       define i32 @mainCRTStartup()
        {
        entry:
          ret i32 0
