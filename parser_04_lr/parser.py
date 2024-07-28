@@ -7,6 +7,7 @@ def lr_parser(grammar: Grammar, tokens):
     while active:
         active = False
 
+        # matching
         if len(buffer) > 0:
             pattern = tuple(e[0] for e in buffer)
             rule, size = grammar.get_rule(pattern)
@@ -18,6 +19,7 @@ def lr_parser(grammar: Grammar, tokens):
                 yield new_element
                 continue
 
+        # consume tokens
         if tokens is None:
             continue
         token = next(tokens)
