@@ -16,19 +16,30 @@ else:
 OUTPUT:
     MOV 15, A
     MOV 17, B
-    CMP A B C ; сравнение A и B
-    JNZ C, else
-    .if-equal:
-        MOV .str-are-equal, A
+    
+    ; if a <= b:
+    CMP A B C
+    JLEZ C, if
+    JMP end
+    .if-1:
+        MOV .str, A
         CALL .print
+        
+        ; if a == b:
         CMP A B C ; сравнение A и B
-        JNZ C, else
+        JZ C, if
+        .if-2:
+            MOV .str, A
+            CALL .print
+            JMP if-end
+        .end-2:
+        
         JMP if-end
-    .else:
-        MOV .str-not-equal, A
+    .else-1:
+        MOV .str, A
         CALL .print
         JMP if-end
-    .end:
+    .end-1:
 """
 
 def parser():
