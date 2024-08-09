@@ -80,8 +80,12 @@ class Compiler:
             if match := self.ASSIGNMENT.match(line):
                 variable_name = match.group(1)
                 variable_value = match.group(2)
-                line_result = f'{self.indent(0)}MOV {variable_value}, {variable_name}'
-                self.result.append(line_result)
+                lines_result = [
+                    f'',
+                    f'{self.indent(0)}; {match.group(0)}',
+                    f'{self.indent(0)}MOV {variable_value}, {variable_name}'
+                ]
+                self.result.extend(lines_result)
 
             if match := self.COMPARISON.match(line):
                 # ; if a <= b:
@@ -95,10 +99,12 @@ class Compiler:
                 self.start_block()
 
                 lines_result = [
-                    f'{self.indent(0)}CMP {variable_1} {variable_2} C',
-                    f'{self.indent(0)}{self.OPERATORS[operator]} C, if',
-                    f'{self.indent(0)}JMP end-{self.current_block}',
-                    f'{self.indent(0)}.if-{self.current_block}']
+                    f'',
+                    f'{self.indent(-1)}; {match.group(0)}',
+                    f'{self.indent(-1)}CMP {variable_1} {variable_2} C',
+                    f'{self.indent(-1)}{self.OPERATORS[operator]} C, if',
+                    f'{self.indent(-1)}JMP end-{self.current_block}',
+                    f'{self.indent(-1)}.if-{self.current_block}']
                 self.result.extend(lines_result)
 
             if match := self.FUNCTION_CALL.match(line):
@@ -107,6 +113,8 @@ class Compiler:
                 function_name = match.group(1)
                 argument = match.group(2)
                 lines_result = [
+                    f'',
+                    f'{self.indent(0)}; {match.group(0)}',
                     f'{self.indent(0)}MOV .{argument}, D',
                     f'{self.indent(0)}CALL .{function_name}'
                 ]
@@ -116,6 +124,8 @@ class Compiler:
                 # JMP end-1
                 # .end-1:
                 lines_result = [
+                    f'',
+                    f'{self.indent(0)}; end',
                     f'{self.indent(0)}JMP end-{self.current_block}',
                     f'{self.indent(-1)}end-{self.current_block}:'
                 ]
@@ -126,6 +136,8 @@ class Compiler:
                 # JMP end-1
                 # .else-1:
                 lines_result = [
+                    f'',
+                    f'{self.indent(0)}; else:',
                     f'{self.indent(0)}JMP end-{self.current_block}',
                     f'{self.indent(-1)}else-{self.current_block}:'
                 ]
