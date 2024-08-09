@@ -1,6 +1,5 @@
 import re
 
-
 """
 INPUT:
 a = 15
@@ -65,26 +64,27 @@ class Compiler:
         self.block_counter = 0
         self.current_block = 0
 
+    def indent(self, extra=0):
+        return '    ' * (len(self.stack) + extra)
+
     def compile(self, text: str) -> str:
         lines = text.split('\n')
 
         # parse one line at a time
         for line in lines:
-            indent = '    '*len(self.stack)
-
             line = line.strip()
-            
+
             if not line:
                 continue
 
-            if match:=self.ASSIGNMENT.match(line):
+            if match := self.ASSIGNMENT.match(line):
                 variable_name = match.group(1)
                 variable_value = match.group(2)
-                line_result = f'{indent}MOV {variable_value}, {variable_name}'
+                line_result = f'{self.indent(0)}MOV {variable_value}, {variable_name}'
                 self.result.append(line_result)
-            
-            if match:=self.COMPARISON.match(line):
-                #; if a <= b:
+
+            if match := self.COMPARISON.match(line):
+                # ; if a <= b:
                 # CMP A B C
                 # JLEZ C, if
                 # JMP end
@@ -93,45 +93,43 @@ class Compiler:
                 variable_2 = match.group(3)
                 operator = match.group(2)
                 self.start_block()
-                
+
                 lines_result = [
-                    f'{indent}CMP {variable_1} {variable_2} C',
-                    f'{indent}{self.OPERATORS[operator]} C, if',
-                    f'{indent}JMP end-{self.current_block}',
-                    f'{indent}.if-{self.current_block}']
+                    f'{self.indent(0)}CMP {variable_1} {variable_2} C',
+                    f'{self.indent(0)}{self.OPERATORS[operator]} C, if',
+                    f'{self.indent(0)}JMP end-{self.current_block}',
+                    f'{self.indent(0)}.if-{self.current_block}']
                 self.result.extend(lines_result)
 
-            if match:=self.FUNCTION_CALL.match(line):
+            if match := self.FUNCTION_CALL.match(line):
                 # MOV .str, D
                 # CALL .print
                 function_name = match.group(1)
                 argument = match.group(2)
                 lines_result = [
-                    f'{indent}MOV .{argument}, D',
-                    f'{indent}CALL .{function_name}'
-                    ]
+                    f'{self.indent(0)}MOV .{argument}, D',
+                    f'{self.indent(0)}CALL .{function_name}'
+                ]
                 self.result.extend(lines_result)
 
-            if match:=self.END.match(line):
+            if match := self.END.match(line):
                 # JMP end-1
                 # .end-1:
                 lines_result = [
-                    f'{indent}JMP end-{self.current_block}',
-                    f'{indent}end-{self.current_block}:'
+                    f'{self.indent(0)}JMP end-{self.current_block}',
+                    f'{self.indent(-1)}end-{self.current_block}:'
                 ]
                 self.result.extend(lines_result)
                 self.end_block()
 
-
-            if match:=self.ELSE.match(line):
+            if match := self.ELSE.match(line):
                 # JMP end-1
                 # .else-1:
                 lines_result = [
-                    f'{indent}JMP end-{self.current_block}',
-                    f'{indent}else-{self.current_block}:'
+                    f'{self.indent(0)}JMP end-{self.current_block}',
+                    f'{self.indent(-1)}else-{self.current_block}:'
                 ]
                 self.result.extend(lines_result)
-                
 
     def start_block(self):
         self.block_counter += 1
@@ -142,20 +140,23 @@ class Compiler:
         self.current_block = self.stack.pop()
 
 
+def main():
+    a = Compiler()
+    input = """
+    a = 15
+    b = 17
+    if a <= b:
+        print(True)
+        if a == b:
+            print(UltimateTrue)
+            end
+    else:
+        print(False)
+        end"""
+
+    a.compile(text=input)
+    print('\n'.join(a.result))
 
 
-a = Compiler()
-input = """
-a = 15
-b = 17
-if a <= b:
-    print(True)
-    if a == b:
-        print(UltimateTrue)
-        end
-else:
-    print(False)
-    end"""
-
-a.compile(text=input)
-print('\n'.join(a.result))
+if __name__ == "__main__":
+    main()
