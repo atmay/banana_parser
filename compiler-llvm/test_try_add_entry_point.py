@@ -52,15 +52,23 @@ def main():
        ; ModuleID = "examples/ir_entry.py"
        target triple = "x86_64-pc-windows-msvc"
        
+       @message = internal constant [19 x i8] c"Hello, assemblers!\\00"
+       
+       declare i32 @puts(i8*)
+       
        define i32 @main()
        {
        entry:
+         %tmp1 = getelementptr  [19 x i8], [19 x i8]* @message, i32 0, i64 0
+         %tmp2 = tail call i32 @puts( i8* %tmp1 ) nounwind
          ret i32 0
        }
        
        define i32 @mainCRTStartup()
        {
        entry:
+         %tmp1 = getelementptr  [19 x i8], [19 x i8]* @message, i32 0, i64 0
+         %tmp2 = tail call i32 @puts( i8* %tmp1 ) nounwind
          ret i32 0
        }
        """
